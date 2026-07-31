@@ -1,17 +1,24 @@
-# Node
+# Dependencies
 node_modules/
 
-# Python
+# Python virtual environment
 venv/
-__pycache__/
-*.pyc
 
 # Environment files
 .env
 
-# Build folders
+# Logs
+logs/
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Build output
 dist/
 build/
 
-# Logs
-*.log
+# OS files
+.DS_Store
+Thumbs.db
