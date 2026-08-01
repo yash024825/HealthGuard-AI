@@ -1,17 +1,29 @@
 import ReactDOM from 'react-dom/client'
 
 import {
-BrowserRouter
+  BrowserRouter
 } from "react-router-dom"
+
+import { Toaster } from "react-hot-toast"
+import { GoogleOAuthProvider } from "@react-oauth/google"
+
+import { AuthProvider } from "./context/AuthContext"
 
 import App from './App'
 import './index.css'
 
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || ""
+
 ReactDOM.createRoot(
-document.getElementById('root')
+  document.getElementById('root')
 ).render(
 
-<BrowserRouter>
-<App/>
-</BrowserRouter>
+  <BrowserRouter>
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <AuthProvider>
+        <App />
+        <Toaster position="top-right" toastOptions={{ duration: 3500 }} />
+      </AuthProvider>
+    </GoogleOAuthProvider>
+  </BrowserRouter>
 )

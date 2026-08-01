@@ -1,6 +1,9 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -68,6 +71,13 @@ const login = async (req, res, next) => {
       });
     }
 
+    if (!user.password) {
+      return res.status(401).json({
+        success: false,
+        message: "This account uses Google sign-in. Please continue with Google.",
+      });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -115,8 +125,74 @@ const getCurrentUser = async (req, res, next) => {
   }
 };
 
+const googleAuth = async (req, res, next) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({
+        success: false,
+        message: "Google credential is required.",
+      });
+    }
+
+    let payload;
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      payload = ticket.getPayload();
+    } catch {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid Google credential.",
+      });
+    }
+
+    const { sub: googleId, email, name, picture } = payload;
+
+    let user = await User.findOne({ $or: [{ googleId }, { email }] });
+
+    if (user) {
+      // Link Google to an existing local account on first Google sign-in
+      if (!user.googleId) {
+        user.googleId = googleId;
+        user.authProvider = "google";
+        if (!user.profileImage && picture) user.profileImage = picture;
+        await user.save();
+      }
+    } else {
+      user = await User.create({
+        fullName: name || email.split("@")[0],
+        email,
+        googleId,
+        authProvider: "google",
+        profileImage: picture || "",
+      });
+    }
+
+    const token = generateToken(user);
+
+    res.status(200).json({
+      success: true,
+      message: "Signed in with Google.",
+      token,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   register,
   login,
   getCurrentUser,
+  googleAuth,
 };

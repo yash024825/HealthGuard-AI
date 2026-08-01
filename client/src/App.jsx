@@ -1,32 +1,39 @@
-import {
-Routes,
-Route
-} from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import HealthProfile from "./pages/HealthProfile";
+import DiabetesPrediction from "./pages/DiabetesPrediction";
+import HeartPrediction from "./pages/HeartPrediction";
+import PredictionResult from "./pages/PredictionResult";
+import History from "./pages/History";
+import NotFound from "./pages/NotFound";
 
-function App(){
+import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-return(
-<Routes>
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-<Route 
-path="/login"
-element={<Login/>}
-/>
+      <Route element={<ProtectedRoute />}>
+        <Route element={<Layout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/health-profile" element={<HealthProfile />} />
+          <Route path="/predict/diabetes" element={<DiabetesPrediction />} />
+          <Route path="/predict/heart" element={<HeartPrediction />} />
+          <Route path="/predictions/:id" element={<PredictionResult />} />
+          <Route path="/history" element={<History />} />
+        </Route>
+      </Route>
 
-<Route
-path="/register"
-element={<Register/>}
-/>
-
-<Route
-path="/dashboard"
-element={<Dashboard/>}
-/>
-</Routes>
-)
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
 }
+
 export default App;
