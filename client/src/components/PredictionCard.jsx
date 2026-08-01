@@ -10,7 +10,7 @@ export default function PredictionCard({ prediction }) {
   return (
     <Link
       to={`/predictions/${prediction._id}`}
-      className="flex items-center gap-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-4 py-3.5 hover:border-[var(--color-primary)] transition-colors group"
+      className="flex items-center gap-4 bg-[var(--color-surface)] rounded-xl px-4 py-3.5 shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 group"
     >
       <div className="w-10 h-10 rounded-lg bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] flex items-center justify-center shrink-0">
         <Icon size={18} />

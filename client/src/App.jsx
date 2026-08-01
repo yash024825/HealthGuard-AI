@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import HealthProfile from "./pages/HealthProfile";
+import Profile from "./pages/Profile";
 import DiabetesPrediction from "./pages/DiabetesPrediction";
 import HeartPrediction from "./pages/HeartPrediction";
 import PredictionResult from "./pages/PredictionResult";
@@ -23,6 +24,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/health-profile" element={<HealthProfile />} />
           <Route path="/predict/diabetes" element={<DiabetesPrediction />} />
           <Route path="/predict/heart" element={<HeartPrediction />} />

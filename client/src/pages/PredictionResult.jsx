@@ -40,74 +40,87 @@ export default function PredictionResult() {
       ? "Heart disease"
       : "Diabetes";
 
+  const accentColor = isPositive ? "var(--color-risk-high)" : "var(--color-risk-low)";
+  const accentBg = isPositive ? "var(--color-risk-high-bg)" : "var(--color-risk-low-bg)";
+
   return (
     <div className="max-w-2xl">
       <Link
         to="/history"
-        className="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6"
+        className="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors mb-6"
       >
         <ArrowLeft size={16} /> Back to history
       </Link>
 
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-7">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs uppercase tracking-wide text-[var(--color-text-muted)] font-medium">
-              {title} prediction
-            </p>
-            <h1 className="font-display text-2xl font-bold text-[var(--color-text)] mt-1">
-              {prediction.prediction?.label}
-            </h1>
+      <div className="relative bg-[var(--color-surface)] rounded-2xl shadow-card-hover overflow-hidden">
+        <span
+          className="absolute top-0 left-0 right-0 h-1.5"
+          style={{ backgroundColor: accentColor }}
+          aria-hidden="true"
+        />
+
+        <div className="p-7">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-[var(--color-text-muted)] font-medium">
+                {title} prediction
+              </p>
+              <h1 className="font-display text-2xl font-bold text-[var(--color-text)] mt-1">
+                {prediction.prediction?.label}
+              </h1>
+            </div>
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
+              style={{ backgroundColor: accentBg, color: accentColor }}
+            >
+              {isPositive ? (
+                <AlertTriangle size={26} />
+              ) : (
+                <CheckCircle2 size={26} />
+              )}
+            </div>
           </div>
-          {isPositive ? (
-            <AlertTriangle
-              size={32}
-              className="text-[var(--color-risk-high)] shrink-0"
-            />
-          ) : (
-            <CheckCircle2
-              size={32}
-              className="text-[var(--color-risk-low)] shrink-0"
-            />
-          )}
+
+          <VitalLine className="w-32 h-6 mt-4" color={accentColor} glow />
+
+          <div className="flex flex-wrap items-center gap-2.5 mt-5">
+            <RiskBadge level={prediction.prediction?.riskLevel} />
+            {prediction.prediction?.confidence != null && (
+              <span className="font-data text-xs bg-[var(--color-surface-alt)] text-[var(--color-text-muted)] px-2.5 py-1 rounded-full">
+                Confidence {prediction.prediction.confidence}%
+              </span>
+            )}
+            {prediction.prediction?.probability != null && (
+              <span className="font-data text-xs bg-[var(--color-surface-alt)] text-[var(--color-text-muted)] px-2.5 py-1 rounded-full">
+                Probability {(prediction.prediction.probability * 100).toFixed(1)}%
+              </span>
+            )}
+          </div>
+
+          <div className="mt-6 pt-6 border-t border-[var(--color-border)]">
+            <h2 className="font-display font-semibold mb-3">Recommendations</h2>
+            <ul className="space-y-2.5">
+              {prediction.prediction?.recommendations?.map((r, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-2.5 text-sm text-[var(--color-text)] bg-[var(--color-surface-alt)] rounded-lg px-3.5 py-2.5"
+                >
+                  <span
+                    className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
+                    style={{ backgroundColor: accentColor }}
+                  />
+                  {r}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <p className="text-xs text-[var(--color-text-muted)] mt-6 pt-6 border-t border-[var(--color-border)]">
+            Generated on {new Date(prediction.createdAt).toLocaleString()} using{" "}
+            {prediction.modelName}. This is a statistical estimate, not a
+            medical diagnosis — always consult a healthcare professional.
+          </p>
         </div>
-
-        <VitalLine className="w-32 h-6 mt-4" />
-
-        <div className="flex flex-wrap items-center gap-3 mt-5">
-          <RiskBadge level={prediction.prediction?.riskLevel} />
-          {prediction.prediction?.confidence != null && (
-            <span className="font-data text-sm text-[var(--color-text-muted)]">
-              Confidence: {prediction.prediction.confidence}%
-            </span>
-          )}
-          {prediction.prediction?.probability != null && (
-            <span className="font-data text-sm text-[var(--color-text-muted)]">
-              Probability: {(prediction.prediction.probability * 100).toFixed(1)}%
-            </span>
-          )}
-        </div>
-
-        <div className="mt-6 pt-6 border-t border-[var(--color-border)]">
-          <h2 className="font-display font-semibold mb-3">Recommendations</h2>
-          <ul className="space-y-2">
-            {prediction.prediction?.recommendations?.map((r, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-2 text-sm text-[var(--color-text)]"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] mt-1.5 shrink-0" />
-                {r}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <p className="text-xs text-[var(--color-text-muted)] mt-6 pt-6 border-t border-[var(--color-border)]">
-          Generated on {new Date(prediction.createdAt).toLocaleString()} using{" "}
-          {prediction.modelName}. This is a statistical estimate, not a
-          medical diagnosis — always consult a healthcare professional.
-        </p>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
+  CircleUserRound,
   UserRound,
   Activity,
   HeartPulse,
@@ -10,6 +11,7 @@ import VitalLine from "./VitalLine";
 
 const links = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/profile", label: "Profile", icon: CircleUserRound },
   { to: "/health-profile", label: "Health Profile", icon: UserRound },
   { to: "/predict/diabetes", label: "Diabetes Check", icon: Activity },
   { to: "/predict/heart", label: "Heart Check", icon: HeartPulse },

@@ -17,6 +17,10 @@ const fields = [
   { name: "age", label: "Age", step: "1", placeholder: "35" },
 ];
 
+const inputCls =
+  "w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white hover:border-[var(--color-primary)]/40 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors text-sm";
+const labelCls = "block text-sm font-medium text-[var(--color-text)] mb-1.5";
+
 export default function DiabetesPrediction() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
@@ -46,7 +50,7 @@ export default function DiabetesPrediction() {
   return (
     <div className="max-w-2xl">
       <div className="mb-6 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] flex items-center justify-center">
+        <div className="w-11 h-11 rounded-xl bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] flex items-center justify-center shadow-sm shrink-0">
           <Activity size={20} />
         </div>
         <div>
@@ -64,21 +68,19 @@ export default function DiabetesPrediction() {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6 space-y-4"
+        className="bg-[var(--color-surface)] rounded-2xl shadow-card p-6 space-y-5"
       >
         <div className="grid sm:grid-cols-2 gap-4">
           {fields.map((f) => (
             <div key={f.name}>
-              <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
-                {f.label}
-              </label>
+              <label className={labelCls}>{f.label}</label>
               <input
                 type="number"
                 step={f.step}
                 required
                 placeholder={f.placeholder}
                 {...register(f.name)}
-                className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
+                className={inputCls}
               />
             </div>
           ))}
@@ -87,7 +89,7 @@ export default function DiabetesPrediction() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] disabled:opacity-60 text-white font-medium py-2.5 rounded-lg transition-colors"
+          className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] disabled:opacity-60 disabled:hover:translate-y-0 text-white font-medium py-2.5 rounded-lg shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
         >
           {submitting ? "Running model…" : "Run prediction"}
         </button>

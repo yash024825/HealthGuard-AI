@@ -79,6 +79,10 @@ const selectFields = [
   },
 ];
 
+const labelCls = "block text-sm font-medium text-[var(--color-text)] mb-1.5";
+const inputCls =
+  "w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white hover:border-[var(--color-accent)]/40 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent transition-colors text-sm";
+
 export default function HeartPrediction() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
@@ -108,14 +112,10 @@ export default function HeartPrediction() {
     }
   };
 
-  const labelCls = "block text-sm font-medium text-[var(--color-text)] mb-1.5";
-  const inputCls =
-    "w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm";
-
   return (
     <div className="max-w-2xl">
       <div className="mb-6 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-[var(--color-accent-light)] text-[var(--color-accent)] flex items-center justify-center">
+        <div className="w-11 h-11 rounded-xl bg-[var(--color-accent-light)] text-[var(--color-accent)] flex items-center justify-center shadow-sm shrink-0">
           <HeartPulse size={20} />
         </div>
         <div>
@@ -133,7 +133,7 @@ export default function HeartPrediction() {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6 space-y-4"
+        className="bg-[var(--color-surface)] rounded-2xl shadow-card p-6 space-y-5"
       >
         <div className="grid sm:grid-cols-2 gap-4">
           {numberFields.map((f) => (
@@ -170,7 +170,7 @@ export default function HeartPrediction() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-[var(--color-accent)] hover:opacity-90 disabled:opacity-60 text-white font-medium py-2.5 rounded-lg transition-colors"
+          className="w-full bg-[var(--color-accent)] hover:opacity-90 disabled:opacity-60 disabled:hover:translate-y-0 text-white font-medium py-2.5 rounded-lg shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
         >
           {submitting ? "Running model…" : "Run prediction"}
         </button>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import { UserRound, Activity, HeartPulse, ClipboardList } from "lucide-react";
 import api from "../api/axios";
 import Loader from "../components/Loader";
 import VitalLine from "../components/VitalLine";
@@ -11,6 +12,21 @@ const fromCsv = (str) =>
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+
+const inputCls =
+  "w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white hover:border-[var(--color-primary)]/40 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors text-sm";
+const labelCls = "block text-sm font-medium text-[var(--color-text)] mb-1.5";
+
+function SectionHeader({ icon: Icon, title }) {
+  return (
+    <div className="flex items-center gap-3 mb-5">
+      <div className="w-9 h-9 rounded-lg bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] flex items-center justify-center shrink-0">
+        <Icon size={17} />
+      </div>
+      <h2 className="font-display font-semibold">{title}</h2>
+    </div>
+  );
+}
 
 export default function HealthProfile() {
   const [loading, setLoading] = useState(true);
@@ -123,10 +139,6 @@ export default function HealthProfile() {
 
   if (loading) return <Loader label="Loading your profile" />;
 
-  const inputCls =
-    "w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm";
-  const labelCls = "block text-sm font-medium text-[var(--color-text)] mb-1.5";
-
   return (
     <div className="max-w-3xl">
       <div className="mb-6">
@@ -140,9 +152,9 @@ export default function HealthProfile() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6">
-          <h2 className="font-display font-semibold mb-4">Basic information</h2>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <section className="bg-[var(--color-surface)] rounded-2xl shadow-card p-6">
+          <SectionHeader icon={UserRound} title="Basic information" />
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>Age</label>
@@ -177,8 +189,8 @@ export default function HealthProfile() {
           </div>
         </section>
 
-        <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6">
-          <h2 className="font-display font-semibold mb-4">Lifestyle</h2>
+        <section className="bg-[var(--color-surface)] rounded-2xl shadow-card p-6">
+          <SectionHeader icon={Activity} title="Lifestyle" />
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>Activity level</label>
@@ -205,20 +217,20 @@ export default function HealthProfile() {
               <input type="number" step="0.5" className={inputCls} {...register("sleepHours")} />
             </div>
             <div className="flex items-center gap-6 pt-7">
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" {...register("smoking")} className="accent-[var(--color-primary)]" />
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" {...register("smoking")} className="accent-[var(--color-primary)] w-4 h-4" />
                 Smokes
               </label>
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" {...register("alcoholConsumption")} className="accent-[var(--color-primary)]" />
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" {...register("alcoholConsumption")} className="accent-[var(--color-primary)] w-4 h-4" />
                 Drinks alcohol
               </label>
             </div>
           </div>
         </section>
 
-        <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6">
-          <h2 className="font-display font-semibold mb-4">Current vitals</h2>
+        <section className="bg-[var(--color-surface)] rounded-2xl shadow-card p-6">
+          <SectionHeader icon={HeartPulse} title="Current vitals" />
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>Blood pressure — systolic</label>
@@ -243,9 +255,9 @@ export default function HealthProfile() {
           </div>
         </section>
 
-        <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6">
-          <h2 className="font-display font-semibold mb-4">Medical history</h2>
-          <p className="text-xs text-[var(--color-text-muted)] mb-4">
+        <section className="bg-[var(--color-surface)] rounded-2xl shadow-card p-6">
+          <SectionHeader icon={ClipboardList} title="Medical history" />
+          <p className="text-xs text-[var(--color-text-muted)] -mt-2 mb-4">
             Separate multiple entries with commas.
           </p>
           <div className="grid sm:grid-cols-2 gap-4">
@@ -271,7 +283,7 @@ export default function HealthProfile() {
         <button
           type="submit"
           disabled={saving}
-          className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] disabled:opacity-60 text-white font-medium px-6 py-2.5 rounded-lg transition-colors"
+          className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] disabled:opacity-60 disabled:hover:translate-y-0 text-white font-medium px-6 py-2.5 rounded-lg shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
         >
           {saving ? "Saving…" : exists ? "Update profile" : "Save profile"}
         </button>
