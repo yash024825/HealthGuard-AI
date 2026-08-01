@@ -42,6 +42,12 @@ const userSchema = new mongoose.Schema(
       default: "local",
     },
 
+    phone: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
     gender: {
       type: String,
       enum: ["Male", "Female", "Other"],
@@ -50,11 +56,7 @@ const userSchema = new mongoose.Schema(
 
     dateOfBirth: {
       type: Date,
-    },
-
-    phone: {
-      type: String,
-      trim: true,
+      default: null,
     },
 
     profileImage: {

@@ -37,12 +37,23 @@ export function AuthProvider({ children }) {
     return res.data.user;
   };
 
-  const register = async (fullName, email, password) => {
+  const register = async (
+    fullName,
+    email,
+    password,
+    phone,
+    gender,
+    dateOfBirth
+  ) => {
     const res = await api.post("/auth/register", {
       fullName,
       email,
       password,
+      phone,
+      gender,
+      dateOfBirth,
     });
+
     localStorage.setItem("token", res.data.token);
     setUser(res.data.user);
     return res.data.user;
@@ -71,16 +82,20 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
   );
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
+
   if (!ctx) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
+
   return ctx;
 }
 

@@ -12,8 +12,20 @@ import GoogleAuthButton from "../components/GoogleAuthButton";
 const schema = z
   .object({
     fullName: z.string().min(2, "Enter your full name"),
+
     email: z.string().email("Enter a valid email address"),
+
+    phone: z
+      .string()
+      .min(10, "Enter a valid phone number")
+      .max(15, "Phone number is too long"),
+
+    gender: z.string().min(1, "Select your gender"),
+
+    dateOfBirth: z.string().min(1, "Select your date of birth"),
+
     password: z.string().min(8, "Password must be at least 8 characters"),
+
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -30,12 +42,23 @@ export default function Register() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({ resolver: zodResolver(schema) });
+  } = useForm({
+    resolver: zodResolver(schema),
+  });
 
   const onSubmit = async (data) => {
     setSubmitting(true);
+
     try {
-      await registerUser(data.fullName, data.email, data.password);
+      await registerUser(
+        data.fullName,
+        data.email,
+        data.password,
+        data.phone,
+        data.gender,
+        data.dateOfBirth
+      );
+
       toast.success("Account created");
       navigate("/health-profile", { replace: true });
     } catch (err) {
@@ -47,22 +70,18 @@ export default function Register() {
     }
   };
 
-  const fields = [
-    { name: "fullName", label: "Full name", type: "text", placeholder: "Jane Doe", autoComplete: "name" },
-    { name: "email", label: "Email", type: "email", placeholder: "you@example.com", autoComplete: "email" },
-    { name: "password", label: "Password", type: "password", placeholder: "••••••••", autoComplete: "new-password" },
-    { name: "confirmPassword", label: "Confirm password", type: "password", placeholder: "••••••••", autoComplete: "new-password" },
-  ];
-
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-[var(--color-bg)]">
       <div className="flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="font-display text-2xl font-bold text-[var(--color-primary-dark)]">
-              HealthGuard<span className="text-[var(--color-accent)]">AI</span>
+              HealthGuard
+              <span className="text-[var(--color-accent)]">AI</span>
             </h1>
+
             <VitalLine className="w-28 h-6 mx-auto mt-2" />
+
             <p className="text-sm text-[var(--color-text-muted)] mt-3">
               Create an account to start tracking your health risk.
             </p>
@@ -79,33 +98,164 @@ export default function Register() {
               <div className="h-px flex-1 bg-[var(--color-border)]" />
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
-              {fields.map((f) => (
-                <div key={f.name}>
-                  <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
-                    {f.label}
-                  </label>
-                  <input
-                    type={f.type}
-                    autoComplete={f.autoComplete}
-                    {...register(f.name)}
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
-                    placeholder={f.placeholder}
-                  />
-                  {errors[f.name] && (
-                    <p className="text-xs text-[var(--color-risk-high)] mt-1">
-                      {errors[f.name].message}
-                    </p>
-                  )}
-                </div>
-              ))}
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="space-y-5"
+              noValidate
+            >
+              {/* Full Name */}
+              <div>
+                <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+                  Full Name
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="John Doe"
+                  autoComplete="name"
+                  {...register("fullName")}
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
+                />
+
+                {errors.fullName && (
+                  <p className="text-xs text-[var(--color-risk-high)] mt-1">
+                    {errors.fullName.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+                  Email
+                </label>
+
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  {...register("email")}
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
+                />
+
+                {errors.email && (
+                  <p className="text-xs text-[var(--color-risk-high)] mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+                  Phone Number
+                </label>
+
+                <input
+                  type="tel"
+                  placeholder="9876543210"
+                  autoComplete="tel"
+                  {...register("phone")}
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
+                />
+
+                {errors.phone && (
+                  <p className="text-xs text-[var(--color-risk-high)] mt-1">
+                    {errors.phone.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Gender */}
+              <div>
+                <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+                  Gender
+                </label>
+
+                <select
+                  {...register("gender")}
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+
+                {errors.gender && (
+                  <p className="text-xs text-[var(--color-risk-high)] mt-1">
+                    {errors.gender.message}
+                  </p>
+                )}
+              </div>
+
+              {/* DOB */}
+              <div>
+                <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+                  Date of Birth
+                </label>
+
+                <input
+                  type="date"
+                  {...register("dateOfBirth")}
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
+                />
+
+                {errors.dateOfBirth && (
+                  <p className="text-xs text-[var(--color-risk-high)] mt-1">
+                    {errors.dateOfBirth.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+                  Password
+                </label>
+
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  {...register("password")}
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
+                />
+
+                {errors.password && (
+                  <p className="text-xs text-[var(--color-risk-high)] mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+                  Confirm Password
+                </label>
+
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  {...register("confirmPassword")}
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
+                />
+
+                {errors.confirmPassword && (
+                  <p className="text-xs text-[var(--color-risk-high)] mt-1">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
 
               <button
                 type="submit"
                 disabled={submitting}
                 className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] disabled:opacity-60 text-white font-medium py-2.5 rounded-lg transition-colors"
               >
-                {submitting ? "Creating account…" : "Create account"}
+                {submitting ? "Creating account..." : "Create Account"}
               </button>
             </form>
           </div>

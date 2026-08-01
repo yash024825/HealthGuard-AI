@@ -1,4 +1,4 @@
-import { Menu, LogOut } from "lucide-react";
+import { Menu, LogOut, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
@@ -9,7 +9,7 @@ export default function Navbar({ onMenuClick }) {
 
   const handleLogout = () => {
     logout();
-    toast.success("Logged out");
+    toast.success("Logged out successfully");
     navigate("/login");
   };
 
@@ -20,43 +20,133 @@ export default function Navbar({ onMenuClick }) {
     .join("")
     .toUpperCase();
 
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-[var(--color-surface)]/90 backdrop-blur-sm border-b border-[var(--color-border)] px-4 lg:px-8 py-3 shadow-sm">
-      <button
-        className="lg:hidden p-2 rounded-md text-[var(--color-text)] hover:bg-[var(--color-surface-alt)]"
-        onClick={onMenuClick}
-        aria-label="Open menu"
-      >
-        <Menu size={20} />
-      </button>
+    <header
+      className="
+        sticky
+        top-0
+        z-50
+        backdrop-blur-xl
+        bg-white/80
+        border-b
+        border-white/40
+        shadow-lg
+      "
+    >
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 h-20 flex items-center justify-between">
 
-      <div className="hidden lg:block">
-        <p className="text-sm text-[var(--color-text-muted)]">Welcome back,</p>
-        <p className="font-display font-semibold text-[var(--color-text)]">
-          {user?.fullName || "—"}
-        </p>
-      </div>
-
-      <div className="flex items-center gap-2 ml-auto">
-        <Link
-          to="/profile"
-          className="flex items-center gap-2.5 pl-1.5 pr-3 py-1.5 rounded-full hover:bg-[var(--color-surface-alt)] transition-colors group"
-        >
-          <div className="w-9 h-9 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] font-display font-semibold flex items-center justify-center text-sm ring-2 ring-transparent group-hover:ring-[var(--color-primary)]/30 transition-all shrink-0">
-            {initials}
-          </div>
-          <span className="hidden sm:block text-sm font-medium text-[var(--color-text)] group-hover:text-[var(--color-primary-dark)] transition-colors">
-            Profile
-          </span>
-        </Link>
-
+        {/* Mobile Menu */}
         <button
-          onClick={handleLogout}
-          className="flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-risk-high)] hover:bg-[var(--color-risk-high-bg)] px-3 py-2 rounded-full transition-colors"
+          onClick={onMenuClick}
+          className="lg:hidden p-2 rounded-xl hover:bg-slate-100 transition"
+          aria-label="Open menu"
         >
-          <LogOut size={16} />
-          <span className="hidden sm:inline">Log out</span>
+          <Menu size={22} />
         </button>
+
+        {/* Welcome */}
+        <div className="hidden lg:flex flex-col">
+          <span className="text-sm text-slate-500">{today}</span>
+
+          <h2 className="font-display text-xl font-bold text-slate-800">
+            Welcome back,
+            <span className="text-teal-600">
+              {" "}
+              {user?.fullName || "User"}
+            </span>
+          </h2>
+        </div>
+
+        {/* Right */}
+        <div className="flex items-center gap-4 ml-auto">
+
+          {/* Health Badge */}
+          <div className="hidden md:flex items-center gap-2 bg-teal-50 text-teal-700 px-4 py-2 rounded-full">
+            <ShieldCheck size={18} />
+            <span className="text-sm font-medium">
+              HealthGuard AI
+            </span>
+          </div>
+
+          {/* Profile */}
+          <Link
+            to="/profile"
+            className="
+              flex
+              items-center
+              gap-3
+              bg-white
+              rounded-full
+              shadow
+              hover:shadow-lg
+              transition-all
+              duration-300
+              px-2
+              py-2
+            "
+          >
+            <div
+              className="
+                h-11
+                w-11
+                rounded-full
+                bg-gradient-to-br
+                from-teal-500
+                to-cyan-600
+                text-white
+                flex
+                items-center
+                justify-center
+                font-bold
+              "
+            >
+              {initials}
+            </div>
+
+            <div className="hidden sm:block">
+              <p className="font-semibold text-slate-800">
+                {user?.fullName}
+              </p>
+
+              <p className="text-xs text-slate-500">
+                View Profile
+              </p>
+            </div>
+          </Link>
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="
+              flex
+              items-center
+              gap-2
+              rounded-full
+              px-4
+              py-2.5
+              bg-red-50
+              text-red-600
+              hover:bg-red-500
+              hover:text-white
+              transition-all
+              duration-300
+              font-medium
+            "
+          >
+            <LogOut size={17} />
+            <span className="hidden md:block">
+              Logout
+            </span>
+          </button>
+
+        </div>
+
       </div>
     </header>
   );

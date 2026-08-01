@@ -21,7 +21,14 @@ const generateToken = (user) => {
 
 const register = async (req, res, next) => {
   try {
-    const { fullName, email, password } = req.body;
+    const {
+      fullName,
+      email,
+      password,
+      phone,
+      gender,
+      dateOfBirth,
+    } = req.body;
 
     const existingUser = await User.findOne({ email });
 
@@ -38,6 +45,9 @@ const register = async (req, res, next) => {
       fullName,
       email,
       password: hashedPassword,
+      phone,
+      gender,
+      dateOfBirth,
     });
 
     const token = generateToken(user);
@@ -50,6 +60,9 @@ const register = async (req, res, next) => {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
+        phone: user.phone,
+        gender: user.gender,
+        dateOfBirth: user.dateOfBirth,
         role: user.role,
       },
     });
@@ -74,7 +87,8 @@ const login = async (req, res, next) => {
     if (!user.password) {
       return res.status(401).json({
         success: false,
-        message: "This account uses Google sign-in. Please continue with Google.",
+        message:
+          "This account uses Google sign-in. Please continue with Google.",
       });
     }
 
@@ -97,6 +111,9 @@ const login = async (req, res, next) => {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
+        phone: user.phone,
+        gender: user.gender,
+        dateOfBirth: user.dateOfBirth,
         role: user.role,
       },
     });
@@ -137,11 +154,13 @@ const googleAuth = async (req, res, next) => {
     }
 
     let payload;
+
     try {
       const ticket = await googleClient.verifyIdToken({
         idToken: credential,
         audience: process.env.GOOGLE_CLIENT_ID,
       });
+
       payload = ticket.getPayload();
     } catch {
       return res.status(401).json({
@@ -152,14 +171,19 @@ const googleAuth = async (req, res, next) => {
 
     const { sub: googleId, email, name, picture } = payload;
 
-    let user = await User.findOne({ $or: [{ googleId }, { email }] });
+    let user = await User.findOne({
+      $or: [{ googleId }, { email }],
+    });
 
     if (user) {
-      // Link Google to an existing local account on first Google sign-in
       if (!user.googleId) {
         user.googleId = googleId;
         user.authProvider = "google";
-        if (!user.profileImage && picture) user.profileImage = picture;
+
+        if (!user.profileImage && picture) {
+          user.profileImage = picture;
+        }
+
         await user.save();
       }
     } else {
@@ -182,6 +206,9 @@ const googleAuth = async (req, res, next) => {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
+        phone: user.phone,
+        gender: user.gender,
+        dateOfBirth: user.dateOfBirth,
         role: user.role,
       },
     });

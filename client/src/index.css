@@ -1,40 +1,77 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap");
 @import "tailwindcss";
 
+/* ===============================
+   Theme
+================================ */
+
 @theme {
-  --color-bg: #F5F8F7;
-  --color-surface: #FFFFFF;
-  --color-surface-alt: #EDF3F1;
-  --color-primary: #0B5D52;
-  --color-primary-dark: #073F38;
-  --color-primary-light: #E4F0EC;
-  --color-accent: #2C6E8C;
-  --color-accent-light: #E5EFF3;
-  --color-risk-high: #B8433B;
-  --color-risk-high-bg: #FBEAE8;
-  --color-risk-medium: #B8791F;
-  --color-risk-medium-bg: #FBF1E1;
-  --color-risk-low: #2F8F5B;
-  --color-risk-low-bg: #E7F5ED;
-  --color-text: #16211F;
-  --color-text-muted: #5C6B68;
-  --color-border: #DDE6E3;
+  --color-bg: #f5f8f7;
+  --color-surface: #ffffff;
+  --color-surface-alt: #edf3f1;
+
+  --color-primary: #0b5d52;
+  --color-primary-dark: #073f38;
+  --color-primary-light: #e4f0ec;
+
+  --color-accent: #2c6e8c;
+  --color-accent-light: #e5eff3;
+
+  --color-risk-high: #b8433b;
+  --color-risk-high-bg: #fbeae8;
+
+  --color-risk-medium: #b8791f;
+  --color-risk-medium-bg: #fbf1e1;
+
+  --color-risk-low: #2f8f5b;
+  --color-risk-low-bg: #e7f5ed;
+
+  --color-text: #16211f;
+  --color-text-muted: #5c6b68;
+  --color-border: #dde6e3;
 
   --font-display: "Space Grotesk", sans-serif;
   --font-body: "IBM Plex Sans", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
 
-  --shadow-card: 0 1px 2px rgba(15, 23, 21, 0.05), 0 12px 28px -16px rgba(11, 93, 82, 0.22);
-  --shadow-card-hover: 0 2px 4px rgba(15, 23, 21, 0.06), 0 22px 40px -16px rgba(11, 93, 82, 0.32);
+  --shadow-card:
+    0 1px 2px rgba(0, 0, 0, .05),
+    0 12px 28px -16px rgba(11, 93, 82, .22);
+
+  --shadow-card-hover:
+    0 8px 16px rgba(0, 0, 0, .08),
+    0 24px 48px rgba(11, 93, 82, .25);
+}
+
+/* ===============================
+   Base
+================================ */
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
 }
 
 body {
-  background-color: var(--color-bg);
+  margin: 0;
+  background: linear-gradient(
+    180deg,
+    #f7fbfa 0%,
+    #eef8f5 100%
+  );
+
   color: var(--color-text);
   font-family: var(--font-body);
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4, .font-display {
+h1,
+h2,
+h3,
+h4,
+.font-display {
   font-family: var(--font-display);
 }
 
@@ -42,15 +79,57 @@ h1, h2, h3, h4, .font-display {
   font-family: var(--font-mono);
 }
 
-/* Vital line signature motif */
+/* ===============================
+   Scrollbar
+================================ */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #edf3f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    to bottom,
+    #0b5d52,
+    #2c6e8c
+  );
+
+  border-radius: 50px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #073f38;
+}
+
+/* ===============================
+   Text Selection
+================================ */
+
+::selection {
+  background: rgba(11, 93, 82, .25);
+}
+
+/* ===============================
+   Vital Animation
+================================ */
+
 @keyframes pulse-travel {
-  0% { stroke-dashoffset: 240; }
-  100% { stroke-dashoffset: 0; }
+  0% {
+    stroke-dashoffset: 240;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+  }
 }
 
 .vital-line path {
   stroke-dasharray: 240;
-  animation: pulse-travel 2.4s linear infinite;
+  animation: pulse-travel 2.5s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -59,18 +138,166 @@ h1, h2, h3, h4, .font-display {
   }
 }
 
+/* ===============================
+   Fade Animation
+================================ */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(35px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp .8s ease forwards;
+}
+
+/* ===============================
+   Floating
+================================ */
+
+@keyframes floating {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-floating {
+  animation: floating 5s ease-in-out infinite;
+}
+
+/* ===============================
+   Gradient Text
+================================ */
+
+.gradient-text {
+  background: linear-gradient(
+    90deg,
+    #0b5d52,
+    #2c6e8c
+  );
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ===============================
+   Glassmorphism
+================================ */
+
+.glass {
+  backdrop-filter: blur(16px);
+  background: rgba(255,255,255,.65);
+  border: 1px solid rgba(255,255,255,.35);
+}
+
+/* ===============================
+   Shadows
+================================ */
+
 .shadow-card {
   box-shadow: var(--shadow-card);
 }
 
-.shadow-card-hover {
+.shadow-card:hover {
   box-shadow: var(--shadow-card-hover);
 }
 
-/* Monitor-screen grid: the graph-paper texture of a bedside vital-signs display */
+/* ===============================
+   Glow
+================================ */
+
+.glow {
+  box-shadow:
+    0 0 40px rgba(11,93,82,.20);
+}
+
+/* ===============================
+   Healthcare Background
+================================ */
+
+.bg-health {
+  background-image:
+    radial-gradient(circle at top left,
+      rgba(11,93,82,.08),
+      transparent 35%),
+
+    radial-gradient(circle at bottom right,
+      rgba(44,110,140,.08),
+      transparent 35%);
+}
+
+/* ECG Grid */
+
 .bg-ecg-grid {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+    linear-gradient(
+      rgba(255,255,255,.06) 1px,
+      transparent 1px
+    ),
+
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,.06) 1px,
+      transparent 1px
+    );
+
   background-size: 22px 22px;
+}
+
+/* ===============================
+   Card Hover
+================================ */
+
+.card-hover {
+  transition:
+    transform .35s ease,
+    box-shadow .35s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* ===============================
+   Button Hover
+================================ */
+
+.btn-primary {
+  transition: all .3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+}
+
+/* ===============================
+   Image Hover
+================================ */
+
+.image-hover {
+  overflow: hidden;
+}
+
+.image-hover img {
+  transition: transform .6s ease;
+}
+
+.image-hover:hover img {
+  transform: scale(1.08);
 }
