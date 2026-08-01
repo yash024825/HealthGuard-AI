@@ -1,7 +1,9 @@
 const express = require("express");
+
 const router = express.Router();
 
 const protect = require("../middleware/auth.middleware");
+const validate = require("../middleware/validate.middleware");
 
 const {
   register,
@@ -14,29 +16,11 @@ const {
   loginValidation,
 } = require("../validators/auth.validator");
 
-const validate = require("../middleware/validate.middleware");
+// Public Routes
+router.post("/register", registerValidation, validate, register);
+router.post("/login", loginValidation, validate, login);
 
-// Register User
-router.post(
-  "/register",
-  registerValidation,
-  validate,
-  register
-);
-
-// Login User
-router.post(
-  "/login",
-  loginValidation,
-  validate,
-  login
-);
-
-// Get Current Logged-in User (Protected Route)
-router.get(
-  "/me",
-  protect,
-  getCurrentUser
-);
+// Protected Routes
+router.get("/me", protect, getCurrentUser);
 
 module.exports = router;

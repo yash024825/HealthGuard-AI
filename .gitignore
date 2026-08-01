@@ -1,24 +1,20 @@
-# Dependencies
+# Node
 node_modules/
+package-lock.json
 
-# Python virtual environment
-venv/
-
-# Environment files
+# Environment
 .env
+*.env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Build
+dist/
+build/
 
 # Logs
 logs/
 *.log
-
-# Python cache
-__pycache__/
-*.pyc
-
-# Build output
-dist/
-build/
-
-# OS files
-.DS_Store
-Thumbs.db

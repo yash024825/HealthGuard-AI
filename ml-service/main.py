@@ -1,17 +1,22 @@
 from fastapi import FastAPI
-from dotenv import load_dotenv
-import os
+from api.prediction import router
 
-load_dotenv()
+app = FastAPI(
+    title="HealthGuard AI ML Service",
+    version="1.0.0"
+)
 
-MODEL_PATH = os.getenv("MODEL_PATH")
-MODEL_VERSION = os.getenv("MODEL_VERSION")
-
-print("Model Path:", MODEL_PATH)
-print("Version:", MODEL_VERSION)
-
-app = FastAPI()
+app.include_router(router)
 
 @app.get("/")
 def root():
-    return {"message": "ML Service Running"}
+    return {
+        "success": True,
+        "message": "HealthGuard AI ML Service Running"
+    }
+
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy"
+    }

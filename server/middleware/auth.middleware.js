@@ -14,7 +14,9 @@ const protect = (req, res, next) => {
 
     // Extract token
     const token = authHeader.split(" ")[1];
-
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET is not configured.");
+    }
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
@@ -25,7 +27,9 @@ const protect = (req, res, next) => {
   } catch (error) {
     return res.status(401).json({
       success: false,
-      message: "Invalid or expired token.",
+      message: error.name === "TokenExpiredError"
+        ? "Token has expired."
+        : "Invalid token.",
     });
   }
 };
