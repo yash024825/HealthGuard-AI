@@ -1,8 +1,7 @@
-const jwt = require("jsonwebtoken");
+const admin = require("../config/firebaseAdmin");
 
-const protect = (req, res, next) => {
+const protect = async (req, res, next) => {
   try {
-    // Get Authorization header
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -12,24 +11,19 @@ const protect = (req, res, next) => {
       });
     }
 
-    // Extract token
-    const token = authHeader.split(" ")[1];
-    if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is not configured.");
-    }
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const idToken = authHeader.split(" ")[1];
 
-    // Attach user info to request
-    req.user = decoded;
+    const decoded = await admin.auth().verifyIdToken(idToken);
+
+    // decoded contains uid, email, name, picture, etc. from the
+    // verified Firebase ID token.
+    req.firebaseUser = decoded;
 
     next();
   } catch (error) {
     return res.status(401).json({
       success: false,
-      message: error.name === "TokenExpiredError"
-        ? "Token has expired."
-        : "Invalid token.",
+      message: "Invalid or expired token.",
     });
   }
 };

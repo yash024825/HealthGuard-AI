@@ -1,38 +1,46 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import {
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  updateProfile,
+  signOut,
+} from "firebase/auth";
+import { auth, googleProvider } from "../firebase";
 import api from "../api/axios";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(
-    () => !!localStorage.getItem("token")
-  );
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      return;
-    }
-
-    api
-      .get("/auth/me")
-      .then((res) => {
-        setUser(res.data.user);
-      })
-      .catch(() => {
-        localStorage.removeItem("token");
+    // Fires on load, on login, on logout, and on token refresh.
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
         setUser(null);
-      })
-      .finally(() => {
         setLoading(false);
-      });
+        return;
+      }
+
+      try {
+        const res = await api.get("/auth/me");
+        setUser(res.data.user);
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return unsubscribe;
   }, []);
 
   const login = async (email, password) => {
-    const res = await api.post("/auth/login", { email, password });
-    localStorage.setItem("token", res.data.token);
+    await signInWithEmailAndPassword(auth, email, password);
+    const res = await api.get("/auth/me");
     setUser(res.data.user);
     return res.data.user;
   };
@@ -45,22 +53,33 @@ export function AuthProvider({ children }) {
     gender,
     dateOfBirth
   ) => {
-    const res = await api.post("/auth/register", {
+    const credential = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(credential.user, { displayName: fullName });
+
+    const res = await api.post("/auth/sync", {
       fullName,
-      email,
-      password,
       phone,
       gender,
       dateOfBirth,
     });
 
-    localStorage.setItem("token", res.data.token);
     setUser(res.data.user);
     return res.data.user;
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
+  const loginWithGoogle = async () => {
+    const credential = await signInWithPopup(auth, googleProvider);
+
+    const res = await api.post("/auth/sync", {
+      fullName: credential.user.displayName,
+    });
+
+    setUser(res.data.user);
+    return res.data.user;
+  };
+
+  const logout = async () => {
+    await signOut(auth);
     setUser(null);
   };
 
@@ -70,6 +89,7 @@ export function AuthProvider({ children }) {
     isAuthenticated: !!user,
     login,
     register,
+    loginWithGoogle,
     logout,
   };
 

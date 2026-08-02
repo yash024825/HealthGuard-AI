@@ -1,91 +1,31 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-const generateToken = (user) => {
-  return jwt.sign(
-    {
-      id: user._id,
-      email: user.email,
-      role: user.role,
-    },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: process.env.JWT_EXPIRES_IN || "7d",
-    }
-  );
-};
-
-const register = async (req, res, next) => {
+/**
+ * Called right after the frontend signs in with Firebase (email/password
+ * or Google). Creates the Mongo profile on first sign-in, or returns the
+ * existing one on subsequent sign-ins.
+ */
+const syncUser = async (req, res, next) => {
   try {
-    const { fullName, email, password, phone, gender, dateOfBirth } = req.body;
+    const { uid, email, name, picture } = req.firebaseUser;
+    const { fullName, phone, gender, dateOfBirth } = req.body;
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        message: "Email already registered.",
-      });
-    }
+    let user = await User.findOne({ firebaseUid: uid });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
-      fullName,
-      email,
-      password: hashedPassword,
-      phone,
-      gender,
-      dateOfBirth,
-    });
-
-    const token = generateToken(user);
-
-    res.status(201).json({
-      success: true,
-      message: "User registered successfully.",
-      token,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        phone: user.phone,
-        gender: user.gender,
-        dateOfBirth: user.dateOfBirth,
-        role: user.role,
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const login = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
-
-    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password.",
+      user = await User.create({
+        firebaseUid: uid,
+        email,
+        fullName: fullName || name || email.split("@")[0],
+        phone: phone || "",
+        gender: gender || "Other",
+        dateOfBirth: dateOfBirth || null,
+        profileImage: picture || "",
       });
     }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password.",
-      });
-    }
-
-    const token = generateToken(user);
 
     res.status(200).json({
       success: true,
-      message: "Login successful.",
-      token,
       user: {
         id: user._id,
         fullName: user.fullName,
@@ -93,6 +33,7 @@ const login = async (req, res, next) => {
         phone: user.phone,
         gender: user.gender,
         dateOfBirth: user.dateOfBirth,
+        profileImage: user.profileImage,
         role: user.role,
       },
     });
@@ -103,21 +44,25 @@ const login = async (req, res, next) => {
 
 const getCurrentUser = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findOne({ firebaseUid: req.firebaseUser.uid });
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found.",
       });
     }
-    res.status(200).json({ success: true, user });
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
   } catch (error) {
     next(error);
   }
 };
 
 module.exports = {
-  register,
-  login,
+  syncUser,
   getCurrentUser,
 };
