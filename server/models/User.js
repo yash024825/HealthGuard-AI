@@ -16,30 +16,13 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
-      match: [
-        /^\S+@\S+\.\S+$/,
-        "Please enter a valid email address",
-      ],
+      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"],
     },
 
     password: {
       type: String,
+      required: [true, "Password is required"],
       minlength: [8, "Password must be at least 8 characters"],
-      required: function () {
-        return !this.googleId;
-      },
-    },
-
-    googleId: {
-      type: String,
-      unique: true,
-      sparse: true,
-    },
-
-    authProvider: {
-      type: String,
-      enum: ["local", "google"],
-      default: "local",
     },
 
     phone: {

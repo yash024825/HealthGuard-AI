@@ -7,25 +7,18 @@ import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import VitalLine from "../components/VitalLine";
 import AuthShowcasePanel from "../components/AuthShowcasePanel";
-import GoogleAuthButton from "../components/GoogleAuthButton";
 
 const schema = z
   .object({
     fullName: z.string().min(2, "Enter your full name"),
-
     email: z.string().email("Enter a valid email address"),
-
     phone: z
       .string()
       .min(10, "Enter a valid phone number")
       .max(15, "Phone number is too long"),
-
     gender: z.string().min(1, "Select your gender"),
-
     dateOfBirth: z.string().min(1, "Select your date of birth"),
-
     password: z.string().min(8, "Password must be at least 8 characters"),
-
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -48,7 +41,6 @@ export default function Register() {
 
   const onSubmit = async (data) => {
     setSubmitting(true);
-
     try {
       await registerUser(
         data.fullName,
@@ -58,7 +50,6 @@ export default function Register() {
         data.gender,
         data.dateOfBirth
       );
-
       toast.success("Account created");
       navigate("/health-profile", { replace: true });
     } catch (err) {
@@ -79,36 +70,22 @@ export default function Register() {
               HealthGuard
               <span className="text-[var(--color-accent)]">AI</span>
             </h1>
-
             <VitalLine className="w-28 h-6 mx-auto mt-2" />
-
             <p className="text-sm text-[var(--color-text-muted)] mt-3">
               Create an account to start tracking your health risk.
             </p>
           </div>
 
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-7 space-y-5">
-            <GoogleAuthButton redirectTo="/health-profile" />
-
-            <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-[var(--color-border)]" />
-              <span className="text-xs text-[var(--color-text-muted)]">
-                or continue with email
-              </span>
-              <div className="h-px flex-1 bg-[var(--color-border)]" />
-            </div>
-
             <form
               onSubmit={handleSubmit(onSubmit)}
               className="space-y-5"
               noValidate
             >
-              {/* Full Name */}
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
                   Full Name
                 </label>
-
                 <input
                   type="text"
                   placeholder="John Doe"
@@ -116,7 +93,6 @@ export default function Register() {
                   {...register("fullName")}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
                 />
-
                 {errors.fullName && (
                   <p className="text-xs text-[var(--color-risk-high)] mt-1">
                     {errors.fullName.message}
@@ -124,12 +100,10 @@ export default function Register() {
                 )}
               </div>
 
-              {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
                   Email
                 </label>
-
                 <input
                   type="email"
                   placeholder="you@example.com"
@@ -137,7 +111,6 @@ export default function Register() {
                   {...register("email")}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
                 />
-
                 {errors.email && (
                   <p className="text-xs text-[var(--color-risk-high)] mt-1">
                     {errors.email.message}
@@ -145,12 +118,10 @@ export default function Register() {
                 )}
               </div>
 
-              {/* Phone */}
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
                   Phone Number
                 </label>
-
                 <input
                   type="tel"
                   placeholder="9876543210"
@@ -158,7 +129,6 @@ export default function Register() {
                   {...register("phone")}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
                 />
-
                 {errors.phone && (
                   <p className="text-xs text-[var(--color-risk-high)] mt-1">
                     {errors.phone.message}
@@ -166,12 +136,10 @@ export default function Register() {
                 )}
               </div>
 
-              {/* Gender */}
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
                   Gender
                 </label>
-
                 <select
                   {...register("gender")}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
@@ -181,7 +149,6 @@ export default function Register() {
                   <option value="Female">Female</option>
                   <option value="Other">Other</option>
                 </select>
-
                 {errors.gender && (
                   <p className="text-xs text-[var(--color-risk-high)] mt-1">
                     {errors.gender.message}
@@ -189,18 +156,15 @@ export default function Register() {
                 )}
               </div>
 
-              {/* DOB */}
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
                   Date of Birth
                 </label>
-
                 <input
                   type="date"
                   {...register("dateOfBirth")}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
                 />
-
                 {errors.dateOfBirth && (
                   <p className="text-xs text-[var(--color-risk-high)] mt-1">
                     {errors.dateOfBirth.message}
@@ -208,12 +172,10 @@ export default function Register() {
                 )}
               </div>
 
-              {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
                   Password
                 </label>
-
                 <input
                   type="password"
                   placeholder="••••••••"
@@ -221,7 +183,6 @@ export default function Register() {
                   {...register("password")}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
                 />
-
                 {errors.password && (
                   <p className="text-xs text-[var(--color-risk-high)] mt-1">
                     {errors.password.message}
@@ -229,12 +190,10 @@ export default function Register() {
                 )}
               </div>
 
-              {/* Confirm Password */}
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
                   Confirm Password
                 </label>
-
                 <input
                   type="password"
                   placeholder="••••••••"
@@ -242,7 +201,6 @@ export default function Register() {
                   {...register("confirmPassword")}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
                 />
-
                 {errors.confirmPassword && (
                   <p className="text-xs text-[var(--color-risk-high)] mt-1">
                     {errors.confirmPassword.message}

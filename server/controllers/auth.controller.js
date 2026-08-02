@@ -1,9 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
-
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -21,17 +18,9 @@ const generateToken = (user) => {
 
 const register = async (req, res, next) => {
   try {
-    const {
-      fullName,
-      email,
-      password,
-      phone,
-      gender,
-      dateOfBirth,
-    } = req.body;
+    const { fullName, email, password, phone, gender, dateOfBirth } = req.body;
 
     const existingUser = await User.findOne({ email });
-
     if (existingUser) {
       return res.status(409).json({
         success: false,
@@ -76,7 +65,6 @@ const login = async (req, res, next) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -84,16 +72,7 @@ const login = async (req, res, next) => {
       });
     }
 
-    if (!user.password) {
-      return res.status(401).json({
-        success: false,
-        message:
-          "This account uses Google sign-in. Please continue with Google.",
-      });
-    }
-
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
       return res.status(401).json({
         success: false,
@@ -125,93 +104,13 @@ const login = async (req, res, next) => {
 const getCurrentUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
-
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found.",
       });
     }
-
-    res.status(200).json({
-      success: true,
-      user,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const googleAuth = async (req, res, next) => {
-  try {
-    const { credential } = req.body;
-
-    if (!credential) {
-      return res.status(400).json({
-        success: false,
-        message: "Google credential is required.",
-      });
-    }
-
-    let payload;
-
-    try {
-      const ticket = await googleClient.verifyIdToken({
-        idToken: credential,
-        audience: process.env.GOOGLE_CLIENT_ID,
-      });
-
-      payload = ticket.getPayload();
-    } catch {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid Google credential.",
-      });
-    }
-
-    const { sub: googleId, email, name, picture } = payload;
-
-    let user = await User.findOne({
-      $or: [{ googleId }, { email }],
-    });
-
-    if (user) {
-      if (!user.googleId) {
-        user.googleId = googleId;
-        user.authProvider = "google";
-
-        if (!user.profileImage && picture) {
-          user.profileImage = picture;
-        }
-
-        await user.save();
-      }
-    } else {
-      user = await User.create({
-        fullName: name || email.split("@")[0],
-        email,
-        googleId,
-        authProvider: "google",
-        profileImage: picture || "",
-      });
-    }
-
-    const token = generateToken(user);
-
-    res.status(200).json({
-      success: true,
-      message: "Signed in with Google.",
-      token,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        phone: user.phone,
-        gender: user.gender,
-        dateOfBirth: user.dateOfBirth,
-        role: user.role,
-      },
-    });
+    res.status(200).json({ success: true, user });
   } catch (error) {
     next(error);
   }
@@ -221,5 +120,4 @@ module.exports = {
   register,
   login,
   getCurrentUser,
-  googleAuth,
 };

@@ -9,7 +9,6 @@ const {
   register,
   login,
   getCurrentUser,
-  googleAuth,
 } = require("../controllers/auth.controller");
 
 const {
@@ -20,8 +19,6 @@ const {
 // Public Routes
 router.post("/register", registerValidation, validate, register);
 router.post("/login", loginValidation, validate, login);
-router.post("/google", googleAuth);
-
 
 // Protected Routes
 router.get("/me", protect, getCurrentUser);

@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import VitalLine from "../components/VitalLine";
 import AuthShowcasePanel from "../components/AuthShowcasePanel";
-import GoogleAuthButton from "../components/GoogleAuthButton";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email address"),
@@ -57,16 +56,6 @@ export default function Login() {
           </div>
 
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-7 space-y-5">
-            <GoogleAuthButton redirectTo="/dashboard" />
-
-            <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-[var(--color-border)]" />
-              <span className="text-xs text-[var(--color-text-muted)]">
-                or continue with email
-              </span>
-              <div className="h-px flex-1 bg-[var(--color-border)]" />
-            </div>
-
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">

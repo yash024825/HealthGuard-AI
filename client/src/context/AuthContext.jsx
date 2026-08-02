@@ -59,13 +59,6 @@ export function AuthProvider({ children }) {
     return res.data.user;
   };
 
-  const loginWithGoogle = async (credential) => {
-    const res = await api.post("/auth/google", { credential });
-    localStorage.setItem("token", res.data.token);
-    setUser(res.data.user);
-    return res.data.user;
-  };
-
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
@@ -77,7 +70,6 @@ export function AuthProvider({ children }) {
     isAuthenticated: !!user,
     login,
     register,
-    loginWithGoogle,
     logout,
   };
 
