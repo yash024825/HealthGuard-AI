@@ -14,9 +14,37 @@ const app = express();
 
 /* ----------------------------- Middleware ----------------------------- */
 
+/* ------------------------------- CORS ------------------------------- */
+// CLIENT_URL is the production frontend origin (single, stable value from
+// Render's env vars). Vercel also spins up a new preview URL on every
+// push/commit though, so a single hardcoded origin blocks those. We allow:
+//   1. CLIENT_URL (production)
+//   2. localhost (local dev)
+//   3. any *.vercel.app subdomain (covers every preview deployment)
+
+const staticAllowedOrigins = [
+  process.env.CLIENT_URL || "http://localhost:5173",
+  "http://localhost:5173",
+];
+
+const isAllowedOrigin = (origin) => {
+  if (staticAllowedOrigins.includes(origin)) return true;
+  try {
+    return new URL(origin).hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+};
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+      // No origin header = same-origin request, curl, server-to-server, etc.
+      if (!origin || isAllowedOrigin(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
     credentials: true,
   })
 );
