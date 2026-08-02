@@ -3,6 +3,25 @@ import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 
+// Firebase auth errors carry a `.code`, not an axios `.response` — map the
+// common ones to something a user can actually act on instead of a generic
+// "failed, try again."
+const ERROR_MESSAGES = {
+  "auth/unauthorized-domain":
+    "This site isn't authorized for Google sign-in yet. (Add it under Firebase Console → Authentication → Settings → Authorized domains.)",
+  "auth/popup-closed-by-user": null, // user-initiated cancel, no toast needed
+  "auth/cancelled-popup-request": null,
+  "auth/account-exists-with-different-credential":
+    "An account already exists with this email using a different sign-in method.",
+  "auth/network-request-failed":
+    "Network error — check your connection and try again.",
+};
+
+function messageFor(err) {
+  if (err.code && err.code in ERROR_MESSAGES) return ERROR_MESSAGES[err.code];
+  return err.response?.data?.message || "Google sign-in failed. Try again.";
+}
+
 export default function GoogleAuthButton({ redirectTo = "/dashboard" }) {
   const { loginWithGoogle } = useAuth();
   const navigate = useNavigate();
@@ -12,14 +31,18 @@ export default function GoogleAuthButton({ redirectTo = "/dashboard" }) {
   const handleClick = async () => {
     setLoading(true);
     try {
-      await loginWithGoogle();
+      const result = await loginWithGoogle();
+
+      // null means we redirected instead of using a popup (mobile fallback)
+      // — the page is navigating away, there's nothing left to do here.
+      if (!result) return;
+
       toast.success("Signed in with Google");
       const target = location.state?.from?.pathname || redirectTo;
       navigate(target, { replace: true });
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || "Google sign-in failed. Try again."
-      );
+      const message = messageFor(err);
+      if (message) toast.error(message);
     } finally {
       setLoading(false);
     }

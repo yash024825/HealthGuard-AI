@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { isSupported, getAnalytics } from "firebase/analytics";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
@@ -14,7 +14,21 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-export const analytics = getAnalytics(app);
+// getAnalytics() throws synchronously in browsers/webviews where Firebase
+// Analytics isn't supported (many mobile in-app browsers, privacy modes,
+// or when a content/ad blocker kills the collection request). Calling it
+// unguarded at module load can crash this entire module — including
+// `auth` and `googleProvider` below — before the app ever renders, which
+// breaks login/signup on affected mobile browsers with no visible error.
+// isSupported() checks first and we only initialize if it's safe to.
+isSupported()
+  .then((supported) => {
+    if (supported) getAnalytics(app);
+  })
+  .catch(() => {
+    // Analytics is a nice-to-have; never let it affect auth.
+  });
+
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 export default app;

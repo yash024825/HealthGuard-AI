@@ -4,6 +4,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   updateProfile,
   signOut,
 } from "firebase/auth";
@@ -12,11 +14,39 @@ import api from "../api/axios";
 
 const AuthContext = createContext(null);
 
+// Popup-based Google sign-in is unreliable on mobile browsers — popups get
+// blocked outright, or silently fail under mobile Safari/Chrome's stricter
+// third-party storage rules. Firebase's own guidance is to use a full-page
+// redirect flow on mobile instead.
+const isMobileDevice = () =>
+  typeof navigator !== "undefined" &&
+  /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+const POPUP_FALLBACK_CODES = new Set([
+  "auth/popup-blocked",
+  "auth/cancelled-popup-request",
+  "auth/operation-not-supported-in-this-environment",
+]);
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Completes a redirect-based Google sign-in (the mobile fallback below).
+    // No-op if the user didn't just arrive back from a redirect.
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (!result) return;
+        const res = await api.post("/auth/sync", {
+          fullName: result.user.displayName,
+        });
+        setUser(res.data.user);
+      })
+      .catch((err) => {
+        console.error("Google redirect sign-in failed:", err);
+      });
+
     // Fires on load, on login, on logout, and on token refresh.
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
@@ -68,14 +98,27 @@ export function AuthProvider({ children }) {
   };
 
   const loginWithGoogle = async () => {
-    const credential = await signInWithPopup(auth, googleProvider);
+    if (isMobileDevice()) {
+      // Page navigates away here. AuthProvider picks up the result via
+      // getRedirectResult() above once the user is sent back.
+      await signInWithRedirect(auth, googleProvider);
+      return null;
+    }
 
-    const res = await api.post("/auth/sync", {
-      fullName: credential.user.displayName,
-    });
-
-    setUser(res.data.user);
-    return res.data.user;
+    try {
+      const credential = await signInWithPopup(auth, googleProvider);
+      const res = await api.post("/auth/sync", {
+        fullName: credential.user.displayName,
+      });
+      setUser(res.data.user);
+      return res.data.user;
+    } catch (err) {
+      if (POPUP_FALLBACK_CODES.has(err.code)) {
+        await signInWithRedirect(auth, googleProvider);
+        return null;
+      }
+      throw err;
+    }
   };
 
   const logout = async () => {
