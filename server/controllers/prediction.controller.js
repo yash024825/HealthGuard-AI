@@ -6,12 +6,25 @@ const {
   predictDiabetes,
 } = require("../services/ml.service");
 
+const requireUser = (req, res) => {
+  if (!req.user) {
+    res.status(404).json({
+      success: false,
+      message: "Account not fully set up yet. Please sign in again.",
+    });
+    return false;
+  }
+  return true;
+};
+
 
 /**
  * Generate Prediction
  */
 const createPrediction = async (req, res, next) => {
   try {
+    if (!requireUser(req, res)) return;
+
     let { predictionType, ...inputData } = req.body;
 
     if (!predictionType) {
@@ -201,6 +214,8 @@ const getPredictionHistory = async (req, res, next) => {
 
   try {
 
+    if (!requireUser(req, res)) return;
+
     const predictions = await Prediction.find({
 
       userId: req.user.id,
@@ -241,6 +256,8 @@ const getPredictionHistory = async (req, res, next) => {
 const getPredictionById = async (req,res,next)=>{
 
   try{
+
+    if (!requireUser(req, res)) return;
 
     const prediction = await Prediction.findOne({
 

@@ -1,0 +1,325 @@
+diff --git a/client/index.html b/client/index.html
+index 6e56e6e..ea01454 100644
+--- a/client/index.html
++++ b/client/index.html
+@@ -3,8 +3,22 @@
+   <head>
+     <meta charset="UTF-8" />
+     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-    <title>client</title>
++    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
++    <title>HealthGuard AI</title>
++    <meta name="description" content="Track your vitals, log your health history, and get AI-powered diabetes and heart disease risk predictions." />
++
++    <!-- PWA: lets users install HealthGuard AI to their home screen on
++         both Android (via manifest) and iOS (via the apple-* tags,
++         since iOS Safari still ignores parts of the manifest spec). -->
++    <link rel="manifest" href="/manifest.webmanifest" />
++    <meta name="theme-color" content="#073f38" />
++
++    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
++    <meta name="apple-mobile-web-app-capable" content="yes" />
++    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
++    <meta name="apple-mobile-web-app-title" content="HealthGuard" />
++
++    <meta name="mobile-web-app-capable" content="yes" />
+   </head>
+   <body>
+     <div id="root"></div>
+diff --git a/client/package.json b/client/package.json
+index e43c9da..3a7e446 100644
+--- a/client/package.json
++++ b/client/package.json
+@@ -36,6 +36,7 @@
+     "eslint-plugin-react-hooks": "^7.1.1",
+     "eslint-plugin-react-refresh": "^0.5.3",
+     "globals": "^17.7.0",
+-    "vite": "^8.2.0"
++    "vite": "^8.2.0",
++    "vite-plugin-pwa": "^1.3.0"
+   }
+-}
+\ No newline at end of file
++}
+diff --git a/client/src/App.jsx b/client/src/App.jsx
+index 00309af..99578ae 100644
+--- a/client/src/App.jsx
++++ b/client/src/App.jsx
+@@ -1,41 +1,49 @@
++import { lazy, Suspense } from "react";
+ import { Routes, Route } from "react-router-dom";
+ 
+-import Login from "./pages/Login";
+-import Register from "./pages/Register";
+-import Home from "./pages/Home";
+-import Dashboard from "./pages/Dashboard";
+-import HealthProfile from "./pages/HealthProfile";
+-import Profile from "./pages/Profile";
+-import DiabetesPrediction from "./pages/DiabetesPrediction";
+-import HeartPrediction from "./pages/HeartPrediction";
+-import PredictionResult from "./pages/PredictionResult";
+-import History from "./pages/History";
+-import NotFound from "./pages/NotFound";
+-
+ import Layout from "./components/Layout";
+ import ProtectedRoute from "./components/ProtectedRoute";
++import Loader from "./components/Loader";
++
++// Each page is loaded on demand instead of all being bundled into one
++// ~950KB JS file. This matters most for mobile users on cellular
++// connections, where a single giant bundle means a long blank-screen
++// wait before anything is interactive.
++const Home = lazy(() => import("./pages/Home"));
++const Login = lazy(() => import("./pages/Login"));
++const Register = lazy(() => import("./pages/Register"));
++const Dashboard = lazy(() => import("./pages/Dashboard"));
++const HealthProfile = lazy(() => import("./pages/HealthProfile"));
++const Profile = lazy(() => import("./pages/Profile"));
++const DiabetesPrediction = lazy(() => import("./pages/DiabetesPrediction"));
++const HeartPrediction = lazy(() => import("./pages/HeartPrediction"));
++const PredictionResult = lazy(() => import("./pages/PredictionResult"));
++const History = lazy(() => import("./pages/History"));
++const NotFound = lazy(() => import("./pages/NotFound"));
+ 
+ function App() {
+   return (
+-    <Routes>
+-      <Route path="/" element={<Home />} />
+-      <Route path="/login" element={<Login />} />
+-      <Route path="/register" element={<Register />} />
++    <Suspense fallback={<Loader label="Loading" />}>
++      <Routes>
++        <Route path="/" element={<Home />} />
++        <Route path="/login" element={<Login />} />
++        <Route path="/register" element={<Register />} />
+ 
+-      <Route element={<ProtectedRoute />}>
+-        <Route element={<Layout />}>
+-          <Route path="/dashboard" element={<Dashboard />} />
+-          <Route path="/profile" element={<Profile />} />
+-          <Route path="/health-profile" element={<HealthProfile />} />
+-          <Route path="/predict/diabetes" element={<DiabetesPrediction />} />
+-          <Route path="/predict/heart" element={<HeartPrediction />} />
+-          <Route path="/predictions/:id" element={<PredictionResult />} />
+-          <Route path="/history" element={<History />} />
++        <Route element={<ProtectedRoute />}>
++          <Route element={<Layout />}>
++            <Route path="/dashboard" element={<Dashboard />} />
++            <Route path="/profile" element={<Profile />} />
++            <Route path="/health-profile" element={<HealthProfile />} />
++            <Route path="/predict/diabetes" element={<DiabetesPrediction />} />
++            <Route path="/predict/heart" element={<HeartPrediction />} />
++            <Route path="/predictions/:id" element={<PredictionResult />} />
++            <Route path="/history" element={<History />} />
++          </Route>
+         </Route>
+-      </Route>
+ 
+-      <Route path="*" element={<NotFound />} />
+-    </Routes>
++        <Route path="*" element={<NotFound />} />
++      </Routes>
++    </Suspense>
+   );
+ }
+ 
+diff --git a/client/vite.config.js b/client/vite.config.js
+index c40e419..0927737 100644
+--- a/client/vite.config.js
++++ b/client/vite.config.js
+@@ -1,12 +1,36 @@
+ import { defineConfig } from 'vite'
+ import react from '@vitejs/plugin-react'
+ import tailwindcss from '@tailwindcss/vite'
++import { VitePWA } from 'vite-plugin-pwa'
+ 
+ export default defineConfig({
+ 
+  plugins:[
+    react(),
+-   tailwindcss()
++   tailwindcss(),
++   VitePWA({
++     // We already hand-author and link manifest.webmanifest in
++     // index.html (it needs the apple-* meta tags alongside it for
++     // iOS home-screen support anyway), so let this plugin focus on
++     // generating and registering the service worker only.
++     manifest: false,
++     registerType: 'autoUpdate',
++     includeAssets: ['favicon.svg', 'icons.svg', 'apple-touch-icon.png'],
++     workbox: {
++       // Cache the built app shell (JS/CSS/HTML/icons) so repeat visits
++       // on mobile are instant and the app still loads with a flaky
++       // connection. API calls to the backend are intentionally left
++       // uncached — health data must always come from the network.
++       globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
++       navigateFallback: '/index.html',
++       runtimeCaching: [
++         {
++           urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
++           handler: 'NetworkOnly',
++         },
++       ],
++     },
++   }),
+  ]
+ 
+ })
+\ No newline at end of file
+diff --git a/server/controllers/health.controller.js b/server/controllers/health.controller.js
+index 6765da3..a810052 100644
+--- a/server/controllers/health.controller.js
++++ b/server/controllers/health.controller.js
+@@ -1,7 +1,20 @@
+ const HealthProfile = require("../models/HealthProfile");
+ 
++const requireUser = (req, res) => {
++  if (!req.user) {
++    res.status(404).json({
++      success: false,
++      message: "Account not fully set up yet. Please sign in again.",
++    });
++    return false;
++  }
++  return true;
++};
++
+ const createHealthProfile = async (req, res, next) => {
+   try {
++    if (!requireUser(req, res)) return;
++
+     const existing = await HealthProfile.findOne({
+       userId: req.user.id,
+     });
+@@ -30,6 +43,8 @@ const createHealthProfile = async (req, res, next) => {
+ 
+ const getHealthProfile = async (req, res, next) => {
+   try {
++    if (!requireUser(req, res)) return;
++
+     const profile = await HealthProfile.findOne({
+       userId: req.user.id,
+     });
+@@ -52,6 +67,8 @@ const getHealthProfile = async (req, res, next) => {
+ 
+ const updateHealthProfile = async (req, res, next) => {
+   try {
++    if (!requireUser(req, res)) return;
++
+     const profile = await HealthProfile.findOneAndUpdate(
+       {
+         userId: req.user.id,
+diff --git a/server/controllers/prediction.controller.js b/server/controllers/prediction.controller.js
+index f2329c3..0502640 100644
+--- a/server/controllers/prediction.controller.js
++++ b/server/controllers/prediction.controller.js
+@@ -6,12 +6,25 @@ const {
+   predictDiabetes,
+ } = require("../services/ml.service");
+ 
++const requireUser = (req, res) => {
++  if (!req.user) {
++    res.status(404).json({
++      success: false,
++      message: "Account not fully set up yet. Please sign in again.",
++    });
++    return false;
++  }
++  return true;
++};
++
+ 
+ /**
+  * Generate Prediction
+  */
+ const createPrediction = async (req, res, next) => {
+   try {
++    if (!requireUser(req, res)) return;
++
+     let { predictionType, ...inputData } = req.body;
+ 
+     if (!predictionType) {
+@@ -201,6 +214,8 @@ const getPredictionHistory = async (req, res, next) => {
+ 
+   try {
+ 
++    if (!requireUser(req, res)) return;
++
+     const predictions = await Prediction.find({
+ 
+       userId: req.user.id,
+@@ -242,6 +257,8 @@ const getPredictionById = async (req,res,next)=>{
+ 
+   try{
+ 
++    if (!requireUser(req, res)) return;
++
+     const prediction = await Prediction.findOne({
+ 
+       _id:req.params.id,
+diff --git a/server/middleware/auth.middleware.js b/server/middleware/auth.middleware.js
+index 073a50a..07421a0 100644
+--- a/server/middleware/auth.middleware.js
++++ b/server/middleware/auth.middleware.js
+@@ -1,4 +1,5 @@
+ const admin = require("../config/firebaseAdmin");
++const User = require("../models/User");
+ 
+ const protect = async (req, res, next) => {
+   try {
+@@ -19,6 +20,25 @@ const protect = async (req, res, next) => {
+     // verified Firebase ID token.
+     req.firebaseUser = decoded;
+ 
++    // Controllers (health.controller.js, prediction.controller.js, etc.)
++    // read `req.user.id`, so we resolve and attach the Mongo user here
++    // instead of leaving them to look it up individually. Without this,
++    // `req.user` was always undefined and every protected route below
++    // threw "Cannot read properties of undefined (reading 'id')".
++    //
++    // Note: we do NOT hard-fail when no Mongo user is found. The very
++    // first call to POST /auth/sync (right after Firebase signup) goes
++    // through this same middleware before that Mongo doc exists yet —
++    // req.user is simply left undefined in that case, and syncUser()
++    // only relies on req.firebaseUser anyway. Routes that genuinely
++    // require an existing profile (health, predictions) guard on
++    // req.user themselves and return a clear error instead of crashing.
++    const user = await User.findOne({ firebaseUid: decoded.uid });
++
++    if (user) {
++      req.user = { id: user._id.toString(), _id: user._id, ...user.toObject() };
++    }
++
+     next();
+   } catch (error) {
+     return res.status(401).json({
+diff --git a/server/middleware/error.middleware.js b/server/middleware/error.middleware.js
+index 4c7600e..cee84d9 100644
+--- a/server/middleware/error.middleware.js
++++ b/server/middleware/error.middleware.js
+@@ -47,9 +47,22 @@ const errorHandler = (err, req, res, next) => {
+   }
+ 
+   // Default error
+-  return res.status(err.statusCode || 500).json({
++  const statusCode = err.statusCode || 500;
++
++  // For genuinely unexpected errors (bugs, not something we deliberately
++  // threw with a statusCode), don't echo the raw error message back to
++  // the client — that leaks implementation details (e.g. the
++  // "Cannot read properties of undefined..." TypeError users used to
++  // see) and isn't actionable for them anyway. Full details are already
++  // logged above via console.error for debugging.
++  const message =
++    statusCode === 500 && process.env.NODE_ENV === "production"
++      ? "Something went wrong on our end. Please try again."
++      : err.message || "Internal Server Error.";
++
++  return res.status(statusCode).json({
+     success: false,
+-    message: err.message || "Internal Server Error.",
++    message,
+   });
+ };
+ 

@@ -1,7 +1,20 @@
 const HealthProfile = require("../models/HealthProfile");
 
+const requireUser = (req, res) => {
+  if (!req.user) {
+    res.status(404).json({
+      success: false,
+      message: "Account not fully set up yet. Please sign in again.",
+    });
+    return false;
+  }
+  return true;
+};
+
 const createHealthProfile = async (req, res, next) => {
   try {
+    if (!requireUser(req, res)) return;
+
     const existing = await HealthProfile.findOne({
       userId: req.user.id,
     });
@@ -30,6 +43,8 @@ const createHealthProfile = async (req, res, next) => {
 
 const getHealthProfile = async (req, res, next) => {
   try {
+    if (!requireUser(req, res)) return;
+
     const profile = await HealthProfile.findOne({
       userId: req.user.id,
     });
@@ -52,6 +67,8 @@ const getHealthProfile = async (req, res, next) => {
 
 const updateHealthProfile = async (req, res, next) => {
   try {
+    if (!requireUser(req, res)) return;
+
     const profile = await HealthProfile.findOneAndUpdate(
       {
         userId: req.user.id,

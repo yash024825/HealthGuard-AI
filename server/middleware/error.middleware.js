@@ -47,9 +47,22 @@ const errorHandler = (err, req, res, next) => {
   }
 
   // Default error
-  return res.status(err.statusCode || 500).json({
+  const statusCode = err.statusCode || 500;
+
+  // For genuinely unexpected errors (bugs, not something we deliberately
+  // threw with a statusCode), don't echo the raw error message back to
+  // the client — that leaks implementation details (e.g. the
+  // "Cannot read properties of undefined..." TypeError users used to
+  // see) and isn't actionable for them anyway. Full details are already
+  // logged above via console.error for debugging.
+  const message =
+    statusCode === 500 && process.env.NODE_ENV === "production"
+      ? "Something went wrong on our end. Please try again."
+      : err.message || "Internal Server Error.";
+
+  return res.status(statusCode).json({
     success: false,
-    message: err.message || "Internal Server Error.",
+    message,
   });
 };
 
