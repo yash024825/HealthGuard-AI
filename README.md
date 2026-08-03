@@ -5,7 +5,8 @@
 HealthGuard AI predicts a user's risk of **diabetes** and **heart disease** from their health data using machine learning, then turns that prediction into a clear risk level, confidence score, and personalized recommendations. It's a full-stack project combining a MERN-style web app (with Firebase Authentication) and a standalone FastAPI machine learning service.
 
 **Live app:** [https://health-guard-ai-psi.vercel.app](https://health-guard-ai-psi.vercel.app)
-**Backend API:** [https://healthguard-ai-dbcx.onrender.com](https://healthguard-ai-dbcx.onrender.com)
+**Backend API:** [https://healthguard-ai-1yjn.onrender.com](https://healthguard-ai-1yjn.onrender.com)
+**ML service:** [https://healthguard-ai-1-0waw.onrender.com](https://healthguard-ai-1-0waw.onrender.com)
 
 ## Preview
 
@@ -263,12 +264,15 @@ The public marketing site (`/`) and the authenticated app share the same React a
 | Service | Platform | URL |
 |---|---|---|
 | Frontend | Vercel | [health-guard-ai-psi.vercel.app](https://health-guard-ai-psi.vercel.app) |
-| Backend API | Render | [healthguard-ai-dbcx.onrender.com](https://healthguard-ai-dbcx.onrender.com) |
+| Backend API | Render | [healthguard-ai-1yjn.onrender.com](https://healthguard-ai-1yjn.onrender.com) |
+| ML service | Render | [healthguard-ai-1-0waw.onrender.com](https://healthguard-ai-1-0waw.onrender.com) |
 
 **Notes for reproducing this deployment:**
 
-- On **Render**, the backend needs all seven backend env vars listed above (`MONGO_URI`, `CLIENT_URL`, `ML_SERVICE_URL`, and the three `FIREBASE_*` values), with `CLIENT_URL` set to the exact Vercel URL **without a trailing slash** — CORS origin matching is an exact string comparison, so a mismatched trailing slash will silently break every authenticated request.
-- On **Vercel**, the frontend needs `VITE_API_URL` pointed at the Render backend **with the `/api` suffix included**, plus the seven `VITE_FIREBASE_*` values.
+- All three services (frontend, backend, ML service) are deployed independently, each connected to this same repo with its own **Root Directory** set on the hosting platform (`client`, `server`, and `ml-service` respectively) — there is no single combined deploy.
+- On **Render**, the ML service needs no environment variables. **Build command:** `pip install -r requirements.txt`. **Start command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`.
+- On **Render**, the backend needs all seven backend env vars listed above (`MONGO_URI`, `CLIENT_URL`, `ML_SERVICE_URL`, and the three `FIREBASE_*` values), with `CLIENT_URL` set to the exact Vercel URL **without a trailing slash** — CORS origin matching is an exact string comparison, so a mismatched trailing slash will silently break every authenticated request. `ML_SERVICE_URL` must point at the ML service's own Render URL above (no trailing slash) — if it's missing, wrong, or the ML service isn't deployed/running, every prediction request fails with a 500 error.
+- On **Vercel**, the frontend needs `VITE_API_URL` pointed at the Render backend **with the `/api` suffix included**, plus the seven `VITE_FIREBASE_*` values. Vite bakes env vars in at build time, so changing one on Vercel requires a fresh deploy (saving the variable alone does not update an already-built site).
 - The Vercel project includes a `client/vercel.json` with a catch-all rewrite to `index.html`, which is required for a Vite + React Router SPA — without it, reloading the page on any route other than `/` returns a 404 from Vercel's server instead of letting React Router handle it client-side.
 - In **Firebase Console → Authentication → Settings → Authorized domains**, the live Vercel domain must be added (in addition to the default `localhost`), or Google Sign-In will fail with `auth/unauthorized-domain` on the deployed site while working fine locally.
 - Render's free tier spins down after inactivity; the first request after idling may take 30–60 seconds while it wakes up.
