@@ -151,7 +151,6 @@ Run all three services in three separate terminals — they don't share a proces
 ```bash
 cd ml-service
 python -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
@@ -165,7 +164,6 @@ Runs at `http://localhost:8000`. Visit `http://localhost:8000/docs` for the inte
 ```bash
 cd server
 npm install
-cp .env.example .env      # then fill in the values, see below
 npm run dev                # nodemon, or `npm start` for production
 ```
 
@@ -176,7 +174,6 @@ Runs at `http://localhost:5000`.
 ```bash
 cd client
 npm install
-cp .env.example .env      # then fill in the values, see below
 npm run dev
 ```
 
