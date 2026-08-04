@@ -55,7 +55,7 @@ export default function Register() {
       navigate("/health-profile", { replace: true });
     } catch (err) {
       console.error("Registration failed:", err);
-      toast.error(`${err.code || "no-code"}: ${err.message || "no-message"}`);
+      toast.error(`${err.code || "no-code"}: ${err.message || err.response?.status || "no-message"}`);
     } finally {
       setSubmitting(false);
     }
