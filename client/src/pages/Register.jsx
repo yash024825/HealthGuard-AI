@@ -8,7 +8,6 @@ import { useAuth } from "../context/AuthContext";
 import VitalLine from "../components/VitalLine";
 import AuthShowcasePanel from "../components/AuthShowcasePanel";
 import GoogleAuthButton from "../components/GoogleAuthButton";
-import { getAuthErrorMessage } from "../utils/authError";
 
 const schema = z
   .object({
