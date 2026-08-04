@@ -56,7 +56,7 @@ export default function Register() {
       navigate("/health-profile", { replace: true });
     } catch (err) {
       console.error("Registration failed:", err);
-      toast.error(getAuthErrorMessage(err, "Could not create your account."));
+      toast.error(`${err.code || "no-code"}: ${err.message || "no-message"}`);
     } finally {
       setSubmitting(false);
     }
