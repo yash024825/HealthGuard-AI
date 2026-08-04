@@ -8,6 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import VitalLine from "../components/VitalLine";
 import AuthShowcasePanel from "../components/AuthShowcasePanel";
 import GoogleAuthButton from "../components/GoogleAuthButton";
+import { getAuthErrorMessage } from "../utils/authError";
 
 const schema = z
   .object({
@@ -54,9 +55,8 @@ export default function Register() {
       toast.success("Account created");
       navigate("/health-profile", { replace: true });
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || "Could not create your account."
-      );
+      console.error("Registration failed:", err);
+      toast.error(getAuthErrorMessage(err, "Could not create your account."));
     } finally {
       setSubmitting(false);
     }

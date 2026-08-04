@@ -8,6 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import VitalLine from "../components/VitalLine";
 import AuthShowcasePanel from "../components/AuthShowcasePanel";
 import GoogleAuthButton from "../components/GoogleAuthButton";
+import { getAuthErrorMessage } from "../utils/authError";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email address"),
@@ -34,9 +35,8 @@ export default function Login() {
       const redirectTo = location.state?.from?.pathname || "/dashboard";
       navigate(redirectTo, { replace: true });
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || "Invalid email or password."
-      );
+      console.error("Login failed:", err);
+      toast.error(getAuthErrorMessage(err, "Invalid email or password."));
     } finally {
       setSubmitting(false);
     }
